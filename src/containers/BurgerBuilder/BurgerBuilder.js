@@ -29,7 +29,9 @@ class BurgerBuilder extends Component {
   };
 
   componentDidMount() {
-    AxiosInstance.get("https://react-galala-burger.firebaseio.com/ingredients.json")
+    AxiosInstance.get(
+      "https://react-galala-burger.firebaseio.com/ingredients.json"
+    )
       .then(response => {
         this.setState({ ingredients: response.data });
       })
@@ -99,38 +101,20 @@ class BurgerBuilder extends Component {
   };
 
   purchaseContinueHandler = () => {
-    // alert("continued!!");
-    this.setState({
-      loading: true
-    });
-    const order = {
-      ingredients: this.state.ingredients,
-      price: this.state.totalPrice,
-      customer: {
-        name: "galala",
-        address: {
-          street: "twenty street",
-          zipCode: "34711",
-          country: "Egypt"
-        },
-        email: "mohamed.abugalala@gmail.com"
-      },
-      deliveryMethod: "fastest"
-    };
+    const queryParams = [];
+    for (const i in this.state.ingredients)
+      queryParams.push(
+        encodeURIComponent(i) +
+          "=" +
+          encodeURIComponent(this.state.ingredients[i])
+      );
+    queryParams.push("price=" + this.state.totalPrice);
 
-    AxiosInstance.post("/orders.json", order)
-      .then(response => {
-        this.setState({
-          loading: false,
-          purchasing: false
-        });
-      })
-      .catch(error => {
-        this.setState({
-          loading: false,
-          purchasing: false
-        });
-      });
+    const queryString = queryParams.join("&");
+    this.props.history.push({
+      pathname: "/checkout",
+      search: "?" + queryString
+    });
   };
 
   render() {
