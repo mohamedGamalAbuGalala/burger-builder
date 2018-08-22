@@ -17,10 +17,10 @@ export const purchaseBurgerStart = () => {
   return { type: actionTypes.PURCHASE_BURGER_START };
 };
 
-export const purchaseBurger = orderData => {
+export const purchaseBurger = (orderData, token) => {
   return dispatch => {
     dispatch(purchaseBurgerStart());
-    AxiosInstance.post("/orders.json", orderData)
+    AxiosInstance.post("/orders.json?auth=" + token, orderData)
       .then(response => {
         console.log(response.data.name);
         dispatch(purchaseBurgerSuccess(response.data.name, orderData));
@@ -58,10 +58,11 @@ export const fetchOrdersStart = () => {
   };
 };
 
-export const fetchOrders = () => {
+export const fetchOrders = (token, userId) => {
   return dispatch => {
     dispatch(fetchOrdersStart());
-    AxiosInstance.get("/orders.json")
+    const queryParams = `?auth=${token}&orderBy="userId"&equalTo="${userId}"`;
+    AxiosInstance.get("/orders.json" + queryParams)
       .then(res => {
         let fetchedOrders = [];
         for (const key in res.data)
@@ -69,7 +70,7 @@ export const fetchOrders = () => {
             ...res.data[key],
             id: key
           });
-          // console.log(fetchedOrders);
+        // console.log(fetchedOrders);
         // dispatch(fetchOrdersSuccess(fetchOrders)); fuck you
         dispatch(fetchOrdersSuccess(fetchedOrders));
       })
