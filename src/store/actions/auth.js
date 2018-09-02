@@ -54,7 +54,7 @@ export const auth = (email, password, isSignUp) => {
         "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyBI8mPOrFlRKmUtvVrriet99BdzPicCACE";
     AxiosInstance.post(url, authData)
       .then(res => {
-        console.log(res);
+        // console.log(res);
         const expirationDate = new Date(
           new Date().getTime() + res.data.expiresIn * 1000
         );
@@ -65,7 +65,7 @@ export const auth = (email, password, isSignUp) => {
         dispatch(checkAuthTimeout(res.data.expiresIn));
       })
       .catch(err => {
-        console.log(err);
+        // console.log(err);
         dispatch(authFail(err.response.data.error));
       });
   };

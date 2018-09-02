@@ -7,6 +7,7 @@ import Button from "../../components/UI/Button/Button";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import classes from "./Auth.css";
 import * as actions from "../../store/actions";
+import { updateObject, checkValidity } from "../../shared/utility";
 class Auth extends Component {
   state = {
     controls: {
@@ -48,37 +49,18 @@ class Auth extends Component {
       this.props.onSetAuthRedirectPath("/");
   }
 
-  checkValidity = (value, rules) => {
-    let isValid = true;
-    if (!rules) return true;
-    if (rules.required) isValid &= value.trim() !== "";
-    if (rules.minLength) isValid &= value.length >= rules.minLength;
-    if (rules.maxLength) isValid &= value.length <= rules.maxLength;
-    if (rules.isEmail)
-      isValid &= /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(
-        value
-      );
-    if (rules.isNumeric) isValid &= /^\d+$/.test(value);
-
-    return Boolean(isValid);
-  };
-
   inputChangedHandler = (event, controlName) => {
     // console.log(event.target.value);
-    const updatedControls = {
-      ...this.state.controls
-    };
-    const updatedFormElement = {
-      ...updatedControls[controlName]
-    };
-    updatedFormElement.value = event.target.value;
-    updatedFormElement.valid = this.checkValidity(
-      updatedFormElement.value,
-      updatedFormElement.validation
-    );
-    updatedFormElement.touched = true;
-    // console.log(updatedFormElement);
-    updatedControls[controlName] = updatedFormElement;
+    const updatedControls = updateObject(this.state.controls, {
+      [controlName]: updateObject(this.state.controls[controlName], {
+        value: event.target.value,
+        valid: checkValidity(
+          event.target.value,
+          this.state.controls[controlName].validation
+        ),
+        touched: true
+      })
+    });
 
     let formIsValid = true;
     for (const key in updatedControls) {
@@ -144,12 +126,11 @@ class Auth extends Component {
         </p>
       );
 
-    let authRedirect = null;
-    if (this.props.isAuthenticated)
-      authRedirect = <Redirect to={this.props.authRedirectPath} />;
     return (
       <div className={classes.Auth}>
-        {authRedirect}
+        {this.props.isAuthenticated && (
+          <Redirect to={this.props.authRedirectPath} />
+        )}
         {errorMessage}
         {form}
         <Button btnType="Danger" clicked={this.switchAuthModeHandler}>
